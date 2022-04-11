@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="estilos_d.css">
+		<title>STONE SIMULADOR</title>
+	</head>
+	
+	<body>
+		<form>
+			<div class="img">
+				<img src="fotos/stone.jpg"  width="175" height="75" alt="historia portafolio">	
+			</div> 
+			<h2>Controle de Estoque Operacional</h2>
+			<input class="card_verde_T" type="button" value="BUSCA TODOS" onclick="seleccion_cuadros(7)"><br>
+			 POLO: <input type="text" onkeyup="this.value = this.value.toUpperCase();" id="userpl"> 
+			<input type="button" value="Buscar" onclick="buscarPL()">
+			<input class="card_vermelo_N" type="button" value="Menor que 10" onclick="seleccion_cuadros(1)">
+			<input class="card_amarelo_N" type="button" value="Entre 10 e 13" onclick="seleccion_cuadros(2)">
+			<input class="card_verde" type="button" value="Entre 14 e 18" onclick="seleccion_cuadros(3)">
+			<input class="card_amarelo_P" type="button" value="Entre 19 e 23" onclick="seleccion_cuadros(4)">
+			<input class="card_vermelo_P" type="button" value="Maior que 23" onclick="seleccion_cuadros(5)">	
+		</form>
+		<header>
+				<div class="container"> </div>
+				<div class="img"></div> 
+				<div id="contenido"></div>		
+		</header>
+		<div id="main">
+			<table class="tabla" id="tabla">
+				<thead>
+					<tr>
+						<th>POLO</th>
+						<th>STOCK</th>
+						<th>VENDAS</th>
+						<th>DIAS-EFEC</th>
+						<th>MEDIA</th>
+						<th>AUTONOMIA</th>
+						<th>REP-STK</th>	
+					</tr>
+				</thead>
+				<tbody class="centrado">
+			</table>
+		</div>	
+			
+		<script>
+				
+				/*	 var catg = ["desc_categoria"]; */
+
+				var catg =[
+					 
+					["Sim vendas"], 
+					["Menos do que 10 Dias"], 
+					["Entre 10 e 13 Dias"], 
+					["Entre 14 e 18 Dias"], 
+					["Entre 19 e 23 Dias"], 
+				 	["Maior a 23 Dias"], 
+					["TOTAL"]
+					];	
+					
+				/*	 var cols = ["cinza", "vermelo", "amarelo", "verde", "amarelo", "vermelo", "verde", naranja]; */	
+				
+				var cols = ['003355', '#FF3030', '#ffff00', '#3cff00', '#f8c046', '#A52A2A', '#006400', '#ff8000'];
+
+					/* estructura Tabla inv:
+
+				/*	 Indice 0 = "polo", 
+					 Indice 1 = "stock",
+					 Indice 2 = "vendas",
+					 Indice 3 = "dias efectivos",
+					 Indice 4 = "media",
+					 Indice 5 = "autonomia,
+					 Indice 6 = "categoria",
+				 	 Indice 7 = "reposicion"
+				*/							  
+				var inv = [
+					["AC-RIO BRANCO", 379, 1091, 176],
+					["AL-MACEIO", 98, 3038, 178],
+					["AM-MANAUS", 220, 4343, 202],
+					["AP-MACAPA", 116, 490, 117],
+					["BA-ALOGOINHAS", 49, 441, 113],
+					["BA-BUNKER SALVADOR", 371, 2805, 92],
+					["BA-FEIRA DE SANTANA", 132, 2758, 175],
+					["BA-VITORIA DA CONQUISTA", 242, 1280, 175],
+					["CE-CASCAVEL", 153, 1110, 166],
+					["CE-FORTALEZA", 236, 10519, 206],
+					["CE-JUAZEIRO DO NORTE", 399, 1725, 180],
+					["CE-SOBRAL", 362, 919, 173],
+					["DF-BRASILIA", 304, 7847, 190],
+					["DF-PLANALTINA", 299, 2288, 179],
+					["ES-ERACRUZ", 100, 501, 103],
+					["ES-CACHOEIRA DE ITAPEM", 287, 483, 110],
+					["ES-GUARAPARI", 304, 844, 158],
+					["ES-VITORIA", 160, 6417, 187],
+					["GO-CATALAO", 187, 695, 155],
+					["GO-GOIANIA", 396, 6417, 182],
+					["GO-ITUMBIARA", 286, 1163, 173],
+					["GO-RIO VERDE", 153, 1176, 176],
+					["GO-VALPARAISO DE GOIAS", 28, 2096, 184],
+					["MA-SAO LUIS", 193, 2825, 183],
+					["MG-ALFENAS", 33, 791, 157],
+					["MG-BELO HORIZONTE", 94, 6945, 185],
+					["MG-JUIZ DE FORA", 185, 2089, 177],
+					["MG-PATOS DE MINAS", 367, 1155, 180],
+					["MG POÇOS DE CALDAS", 75, 901, 160],
+					["MG-POUSO ALEGRE", 36, 717, 157],
+					["MS-CAMPO GRANDE", 66, 1884, 180],
+					["MS-DOURADOS", 274, 881, 173],
+					["MT-CUIABA", 241, 3496, 185],
+					["MT-PRIMAVERA DO LESTE", 277, 801, 164],
+					["PA-CASTANHAL", 299, 780, 166],
+					["PA-MARABA", 52, 518, 127],
+					["PB-CAMPINA GRANDE", 360, 1614, 178],
+					["PB-JOAO PESSOA", 12, 3176, 187],
+					["PB-PATOS", 130, 487, 139],
+					["PE-BUNKER RECIFE 1", 158, 2608,97], 
+					["PE-CARUARU", 130, 1755, 182],
+					["PE-GRAVATA", 309, 595, 131],
+					["PE-JABOATAO DOS GUARARAPES", 336, 2986, 199],
+					["PE-OLINDA", 293, 2035, 184],
+					["PE-VALE DO SAO FANCISCO", 358, 1826, 183],
+					["PI-TERESINA", 322, 2152, 181],
+					["PR-APUCARANA", 394, 915, 167],
+					["PR-CURITIBA", 17, 2708, 195],
+					["PR-FOZ DO IGUAÇU", 80, 1651, 185],
+					["PR-LONDRINA", 365, 3266, 195],
+					["PR-MARINGA", 11, 3521, 193],
+					["RJ-BANGU", 258, 1820, 175],
+					["RJ-BUNKER 1", 280, 11057,188], 
+					["RJ-CABO FRIO", 299, 2163, 178],
+					["RJ-CAMPO GRANDE", 73, 1544, 165],
+					["RJ-CAMPOS", 167, 1879, 171],
+					["RJ-DUQUE DE CAXIAS", 393, 2472, 143],
+					["RJ-ITAPERUNA", 368, 1283, 174],
+					["RJ-MACAE", 239, 1322, 169],
+					["RJ-NITEROI", 72, 2015, 170],
+					["RJ-RECREIO", 60, 1484, 169],
+					["RJ-RESENDE", 125, 848, 164],
+					["RIO DAS OSTRAS", 156, 885, 142],
+					["RJ-SANTA CRUZ", 224, 169, 28],
+					["RJ-SAO GONÇALO", 240, 2534, 188],
+					["RJ-SAQUAREMA", 173, 1810, 180],
+					["RJ-VOLTA REDONDA", 360, 2663, 180],
+					["RN-NATAL", 344, 5356, 185],
+					["RO-PORTO VELHO", 388, 1385, 176],
+					["RS-CAXIAS DO SUL", 137, 1574, 175]	
+				];
+			var textMSJ= ' ';	
+			var area_original = document.getElementById("tabla").innerHTML;		
+			contenido.innerHTML = ' ';
+			var i = 0;
+			var j = 0;
+			var categoria = Number(7);
+			for(i=0;i<inv.length;i++) {
+				inv[i][4] = Math.round(inv[i][2] / inv[i][3]); 
+				inv[i][5] = Math.round(inv[i][1] / inv[i][4]); 
+				inv[i][7] = Number((14 - inv[i][5]) * inv[i][4]);
+				if (inv[i][2] < 1){ 
+					 inv[i][6] = Number(0)
+					 inv[i][7] = Number(0)
+					 inv[i][2] = Number(0)
+					 inv[i][3] = Number(0)
+				}
+				if (inv[i][5] < 10){ 
+					 inv[i][6]= Number(1);		 
+				}
+				if ((inv[i][5] >= 10) && (inv[i][5] <= 13)){
+					 inv[i][6]= Number(2);	 
+				}
+				if ((inv[i][5] >= 14) && (inv[i][5] <= 18)){
+					 inv[i][6]= Number(3);
+					 inv[i][7] = Number(0);
+				}
+				if ((inv[i][5] >= 19) && (inv[i][5] <= 23)){
+					 inv[i][6]= Number(4);	 	
+				}
+				if (inv[i][5] > 23){
+					 inv[i][6]= Number(5);	 
+				}
+			}
+			
+			/*
+			   	carga inicial muestra todos los polos
+			*/
+
+			seleccion_cuadros(7)
+				
+			/*
+			   	busca un Polo por nombre
+			*/
+					
+			function buscarPL() {
+				j = Number(0);
+				userpl = document.getElementById("userpl");
+					for(j=0;j<inv.length;j++) {
+						if (userpl.value == inv[j][0]){
+							buscack(j)
+							j = 1 + inv.length;
+							eraseText()
+						};
+					};
+					if (j <= inv.length) {
+						alert("Com licença, " +userpl.value+
+						"  não encontrado,\ntente com otro,\n				                                    Obrigado ");
+						eraseText()
+					};			
+			}
+
+			/*
+			   	busca un Polo onclick
+			*/
+
+			function buscack(j) {
+				if ((categoria == inv[j][6]) || (categoria == 7)){
+					document.getElementById('registro_'+j).className = 'parpadea';
+					document.getElementById('reg_'+j).style.backgroundColor=cols[inv[j][6]];
+				}
+				contenido.innerHTML = ' ';
+				textMSJ = "==>(ANTES)";
+				seleccion_polo(j)
+					var upd_stock = (inv[j][7] + " é o valor sugerido,");
+			 		var nupd_stock = prompt (upd_stock +" se você deseja alterar, insira um novo valor ")
+			 		if (nupd_stock != 0){
+						inv[j][1] = ((Number(nupd_stock) + inv[j][1]))
+						inv[j][5] = Math.round(inv[j][1] / inv[j][4])
+						inv[j][7] = Number((14 - inv[j][5]) * inv[j][4]);
+						
+						if (inv[j][5] < 10){ 
+					 		inv[j][6]= Number(1);
+					 			 
+						}
+						if ((inv[j][5] >= 10) && (inv[j][5] <= 13)){
+						 	 inv[j][6]= Number(2);
+					 		
+						}
+						if ((inv[j][5] >= 14) && (inv[j][5] <= 18)){
+					 		 inv[j][6]= Number(3);
+					 		 inv[j][7] = Number(0);
+						}
+						if ((inv[j][5] >= 19) && (inv[j][5] <= 23)){
+					 		 inv[j][6]= Number(4);
+					 		
+						}
+						if (inv[j][5] > 23){
+					 		inv[j][6]= Number(5);
+					 			 
+						}
+			 		}
+					else { 
+						inv[j][1] = Number((inv[j][7] + inv[j][1]))
+						inv[j][7] = Number(0)
+						inv[j][5] = Math.round(inv[j][1] / inv[j][4])
+						inv[j][6] = Number(3)	
+					}
+				textMSJ = "==>(DESPUES)"
+				seleccion_polo(j)
+			}
+
+			/*
+			   	Limpa area de input
+			*/
+			function eraseText() {
+    				 document.getElementById("userpl").value = "";
+			}
+
+			/*
+				 Lista cuadros de la categoria 
+			*/
+
+			function seleccion_cuadros(categoria) {
+				    contenido.innerHTML = ' ';
+    				for(j=0;j<inv.length;j++) {
+						if ((inv[j][6] === categoria) || (categoria === 7)) {	
+							document.getElementById("contenido").innerHTML +=
+							'<a  onclick="buscack('+j+')" id="registro_'+j+'"  class="card_SIN_VENTAS">'+inv[j][0]+'</a>'
+ 							document.getElementById('registro_'+j).style.backgroundColor=cols[inv[j][6]]; 	 
+						}				
+    				}
+
+			/*
+				 Lista detalhada de categorias 
+			*/
+
+					tabla.innerHTML = area_original;
+					j = Number(0);
+					var rep = Number(0);
+					var acumula_polos = Number(0);
+					var acumula_polo = Number(0);
+					var acumula_vendas = Number(0);
+					var acumula_rep = Number(0);
+					var acumula_stock = Number(0);
+					for(j=0;j<inv.length;j++) {
+						if ((inv[j][6] == categoria) || (categoria == 7)) {
+							acumula_polos = (acumula_polos + 1);
+							acumula_stock = (inv[j][1] + acumula_stock);
+							acumula_vendas = (inv[j][2] + acumula_vendas);
+							acumula_rep = inv[j][7] + acumula_rep;
+							if (inv[j][6] == 0) {
+								inv[j][4] = Number(0);
+								inv[j][5] = Number(0); 
+							} 
+							document.getElementById("tabla").innerHTML +=
+							'<tr class="centrado" id="reg_'+j+'"><td class="campo_polo">'
+							+inv[j][0]+'</td><td>'+inv[j][1]+'</td><td>'
+							+inv[j][2]+'</td><td>'+inv[j][3]+'</td><td>'
+							+inv[j][4]+'</td><td>'+inv[j][5]+'</td><td>'
+							+inv[j][7]+'</td></tr>'
+						}
+					}
+					/*
+								 totales detalhados das categorias 
+					*/
+    				if (categoria == 0) {
+						acumula_vendas = 'Nenhuma venda no período examinado';
+					}
+					document.getElementById("tabla").innerHTML +=
+					'<tr class="total_rep"><td>'+acumula_polos+'</td><td>'
+					+acumula_stock+'</td><td>'+acumula_vendas+'</td><td>'
+					+0+'</td><td>'+0+'</td><td>'+0+'</td><td>'
+					+acumula_rep+'</td></tr>'	
+			}
+
+			/*
+				 presenta cambios del polo seleccionado 
+			*/
+	
+			function seleccion_polo(j) {	
+				contenido.innerHTML +=` <div>
+					<a class='mcard${inv[j][6]}'>  ${inv[j][0]}\n${textMSJ} </a>
+					<a class="mcard">STOCK  = ${inv[j][1]} </a>
+					<a class="mcard">VENDAS = ${inv[j][2]} </a>
+					<a class="mcard">DIAS-HAB = ${inv[j][3]} </a>
+					<a class="mcard">MEDIA = ${inv[j][4]} </a>
+					<a class="mcard">AUTONOMIA = ${inv[j][5]} </a>
+					<a class="mcard">REPOS = ${inv[j][7]} </a>	
+					</div>`	
+			}
+			
+		</script>	
+	</body>
+</html>
